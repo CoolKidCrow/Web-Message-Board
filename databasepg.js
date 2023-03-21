@@ -1,4 +1,4 @@
-const {Client} = require('pg');
+const { Client } = require('pg');
 
 const fs = require('fs');
 
@@ -14,13 +14,30 @@ const client = new Client({
 
 client.connect();
 
-client.query(`SELECT * FROM users`, (err, res)=>{
-    if(!err)
-    {
-        console.log(res.rows[0]);
-    }else {
-        console.log(err.message);
+function PostMessage(message) {
+    try {
+        const query = 'INSERT INTO messages VALUES ($1) RETURNING *'
+        client.query(query, [message.text], (err, res) => {
+            var message = (err) ? "Error: " + err.message : "Res: " + res.rows;
+            console.log(message);
+        });
+    } catch (err) {
+        console.log(err.stack);
     }
 
-    client.end;
-});
+}
+
+function FetchMessages() {
+    try {
+        const query = 'SELECT * FROM messages'
+        client.query(query, (err, res) => {
+            var message = (err) ? "Error: " + err.message : res.rows;
+            console.log(message);
+            if(!err) return message;
+        });
+    } catch (err) {
+        console.log(err.stack);
+    }
+}
+
+module.exports = { PostMessage, FetchMessages }
