@@ -14,28 +14,22 @@ const client = new Client({
 
 client.connect();
 
-function PostMessage(message) {
+async function PostMessage(message) {
     try {
-        const query = 'INSERT INTO messages VALUES ($1) RETURNING *'
-        client.query(query, [message.text], (err, res) => {
-            var message = (err) ? "Error: " + err.message : "Res: " + res.rows;
-            console.log(message);
-        });
+        const query = 'INSERT INTO messages (text) VALUES ($1)';
+        await client.query(query, [message.text]);
     } catch (err) {
         console.log(err.stack);
     }
-
 }
 
-function FetchMessages() {
-    try {
-        const query = 'SELECT * FROM messages'
-        client.query(query, (err, res) => {
-            var message = (err) ? "Error: " + err.message : res.rows;
-            console.log(message);
-            if(!err) return message;
-        });
-    } catch (err) {
+async function FetchMessages() {
+    try{
+        const query = 'SELECT * FROM messages ORDER BY created_at DESC';
+        var message = await client.query(query);
+
+        return message;
+    } catch (err){
         console.log(err.stack);
     }
 }
